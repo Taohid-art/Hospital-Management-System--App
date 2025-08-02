@@ -27,9 +27,18 @@ const AddDoctor = () => {
     const router = useRouter();
     const submitHandler = async (e) => {
         e.preventDefault();
+        const fromdata = new FormData();
+        for ( const key in doctordata){
+          fromdata.append(key,doctordata[key]);
+
+        }
         try{
-      const res = await axios.post("http://localhost:5000/doctors/add",doctordata)
-      console.log(res);
+      const res = await axios.post("http://localhost:5000/doctors/add",fromdata,{
+        headers:{
+          'Content-Type':'multipart/form-data'
+        }
+      })
+      
       
       if (res.status===200){
         router.push('/doctors')
@@ -113,10 +122,10 @@ const AddDoctor = () => {
             placeholder="Department ID"
             name="department_id"
           />
-          < input  required value={doctordata.profile_image}
-            onChange={handleChange}
+          < input  required 
+            onChange={ (e)=> setdoctordata({...doctordata , profile_image:e.target.files[0]})}
             className=" p-3 border rounded-lg shadow-sm focus:outline-blue-500 w-full;"
-            type="text"
+            type="file"
             placeholder="Profile Image URL"
             name="profile_image"
           />

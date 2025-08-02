@@ -3,6 +3,7 @@ import Image from 'next/image';
 import React from 'react'
 import doctorimage from '@/public/images/Rectangle 401.png'
 import DeleteButton from '@/components/Buttons/DeleteButton';
+import Link from 'next/link';
 const page = async ({params}) => {
  
   const { id } = params;
@@ -19,7 +20,9 @@ const page = async ({params}) => {
         {/* Image */}
         <div className="md:w-1/3 bg-gradient-to-b from-blue-500 to-blue-600 flex items-center justify-center p-2">
           <Image
-            src={doctorimage}
+            width={256}
+            height={144}
+            src={ `http://localhost:5000/images/${doctor.profile_image}`}
             alt={`Dr. ${doctor.first_name} ${doctor.last_name}`}
             className="rounded-xl w-full h-auto object-cover shadow-lg"
           />
@@ -44,11 +47,12 @@ const page = async ({params}) => {
             <p><strong>Department ID:</strong> {doctor.department_id}</p>
            
           </div> 
-          <div className='flex justify-between mt-4 aling-center '>
            { admin &&
-            <DeleteButton href={`/doctors/${doctor.doctor_id}`} />
-           } 
+          <div className='flex justify-between mt-4 aling-center '>
+            <DeleteButton href={`/doctors/${doctor.doctor_id}`} location={'/doctors'} item={'Doctor'} />
+            <Link href={`/doctors/${doctor.doctor_id}/updatee`} className=' mt-4 cursor-pointer bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-800 transition-colors duration-300'>Update</Link>
             </div>
+           } 
         </div>
       </div>
     </main>

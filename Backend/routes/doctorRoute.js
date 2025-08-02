@@ -1,8 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const connection = require('../db');
-
+// const {upload} = require('../utils/multerConfig');
 // GET all doctors with filters
+const multer = require('multer') 
+const path = require('path') 
+const crypto = require('crypto') 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, '../frontend/public/images')
+  },
+  filename: function (req, file, cb) {
+    crypto.randomBytes(16, (err, buffer) => {
+      if (err) {
+        return cb(err)
+      }
+      const uniqueName = buffer.toString('hex') + path.extname(file.originalname)
+      cb(null, uniqueName)
+    })
+  
+}})
+
+const upload = multer({ storage: storage })
+
+
+
+
 router.get('/', (req, res) => {
   const { name, specialization, status, gender } = req.query;
 
@@ -51,7 +74,7 @@ router.get('/:id', (req, res) => {
     }
   );
 });
-router.post('/add', (req, res) => {
+router.post('/add',upload.single('profile_image'),(req, res) => {
   const {
     first_name,
     last_name,
@@ -59,7 +82,7 @@ router.post('/add', (req, res) => {
     phone,
     email,
     department_id,
-    profile_image,
+    
     specialization,
     qualification,
     years_of_experience,
@@ -68,7 +91,9 @@ router.post('/add', (req, res) => {
     available_time_to,
     status,
   } = req.body;
-
+  const profile_image = req.file ? req.file.filename : null; // Handle file upload
+  
+  
   const sql = `
     INSERT INTO Doctors (
       first_name,
@@ -116,29 +141,146 @@ router.post('/add', (req, res) => {
 
 
 
+router.put('/:id/update',upload.single('profile_image'), (req, res) => {
+  const doctorId = req.params.id;
+
+  const {
+    first_name,
+    last_name,
+    gender,
+    phone,
+    email,
+    department_id,
+  
+    specialization,
+    qualification,
+    years_of_experience,
+    available_days,
+    available_time_from,
+    available_time_to,
+    status,
+  } = req.body;
+   const profile_image = req.file ? req.file.filename : null;
+  
+
+    const selectSql = 'SELECT profile_image FROM doctors WHERE doctor_id = ?';
+  connection.query(selectSql, [doctorId], (selectErr, selectResult) => {
+    if (selectErr) {
+      console.error('Failed to fetch doctor data:', selectErr);
+      return res.status(500).json({ message: 'Error fetching doctor data' });
+    }
+
+    if (selectResult.length === 0) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+  const oldImage = selectResult[0].profile_image;
+  if (profile_image && oldImage) {
+    const oldImagePath = path.join(__dirname, '../../frontend/public/images', oldImage);
+    fs.unlink(oldImagePath, (fsErr) => {
+      if (fsErr) {
+        console.warn(`Old image not found or already deleted: ${oldImage}`);
+      } else {
+        console.log(`Deleted old image file: ${oldImage}`);
+      }
+    });
+  }
+  })
+  const sql = `
+    UPDATE doctors SET 
+      first_name =?,
+      last_name  = ?,
+      gender = ?,
+      phone = ?,
+      email = ?,
+      department_id = ?,
+      profile_image = ?,
+      specialization = ?,
+      qualification = ?,
+      years_of_experience = ?,
+      available_days = ?,
+      available_time_from = ?,
+      available_time_to = ?,
+      status = ?
+     WHERE doctor_id = ?
+  `;
+
+  const values = [
+    first_name,
+    last_name,
+    gender,
+    phone,
+    email,
+    department_id,
+    profile_image,
+    specialization,
+    qualification,
+    years_of_experience,
+    available_days,
+    available_time_from,
+    available_time_to,
+    status,
+    doctorId,
+  ];
+
+    connection.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Update error:", err);
+      return res.status(500).json({ message: "Update failed" });
+    }
+    res.status(200).json({ message: "Doctor updated successfully" });
+  });
+});
+
+
 
 
 
 // DELETE doctor by ID
+const fs = require('fs');
+
+
+
 router.delete('/:id', (req, res) => {
   const doctorId = req.params.id;
-  if (!doctorId) {
-    return res.status(400).json({ message: 'Doctor ID is required' });
-  }
 
-  const sql = 'DELETE FROM doctors WHERE doctor_id = ?';
+  // Step 1: Fetch the doctor's profile_image filename
+  const selectSql = 'SELECT profile_image FROM doctors WHERE doctor_id = ?';
 
-  connection.query(sql, [doctorId], (err, result) => {
+  connection.query(selectSql, [doctorId], (err, results) => {
     if (err) {
-      console.error('Error deleting doctor:', err);
-      return res.status(500).json({ message: 'Failed to delete doctor' });
+      console.error('Error fetching doctor:', err);
+      return res.status(500).json({ message: 'Failed to fetch doctor' });
     }
 
-    if (result.affectedRows === 0) {
+    if (results.length === 0) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
 
-    res.status(200).json({ message: 'Doctor deleted successfully' });
+    const imageFile = results[0].profile_image;
+    
+    
+    const imagePath = path.join(__dirname, '../../frontend/public/images', imageFile);
+
+
+    // Step 2: Delete the image file
+    fs.unlink(imagePath, (fsErr) => {
+      if (fsErr) {
+        console.warn(`Image not found or already deleted: ${imageFile}`);
+      } else {
+        console.log(`Deleted image file: ${imageFile}`);
+      }
+
+      // Step 3: Delete the doctor from database
+      const deleteSql = 'DELETE FROM doctors WHERE doctor_id = ?';
+      connection.query(deleteSql, [doctorId], (err, result) => {
+        if (err) {
+          console.error('Error deleting doctor:', err);
+          return res.status(500).json({ message: 'Failed to delete doctor' });
+        }
+
+        res.status(200).json({ message: 'Doctor and image deleted successfully' });
+      });
+    });
   });
 });
 

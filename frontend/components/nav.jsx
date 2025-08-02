@@ -3,7 +3,7 @@ import Image from 'next/image'
 import logo from '@/public/images/vector.png'
 import Link from 'next/link'
 const nav = () => {
-  const admin = false
+  const admin = true
   return (
     <div>
        <header className='h-24 bg-[#EFFBFF] flex items-center justify-between px-8'>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Image from 'next/image';
-import doctorimage from '@/public/images/Rectangle 401.png';
+
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -36,6 +36,7 @@ export default function DoctorsPage() {
     setFilter({ ...filter, [e.target.name]: e.target.value });
   };
 
+ 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-100 via-white to-blue-200">
       <h1 className="text-center text-4xl md:text-5xl text-[#102D47] font-bold mb-8">
@@ -105,12 +106,18 @@ export default function DoctorsPage() {
               transition={{ duration: 0.4 }}
             >
               <Link href={`/doctors/${doctor.doctor_id}`}>
+             
+
                 <div className="bg-white hover:bg-blue-500 text-black hover:text-white w-64 h-full p-2 rounded-xl shadow-lg transition-all duration-300 group">
                   <Image
-                    src={doctorimage}
+                  width={256}
+                  height={144}
+                    src={ `http://localhost:5000/images/${doctor.profile_image}`}
                     alt="doctor"
                     className="rounded-lg h-52 w-full object-cover mb-4"
                   />
+                  
+
                   <h2 className="text-xl font-bold text-blue-600 group-hover:text-white">
                     Dr. {doctor.first_name} {doctor.last_name}
                   </h2>
