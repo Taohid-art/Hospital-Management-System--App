@@ -1,27 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const connection = require('../db');
-// const {upload} = require('../utils/multerConfig');
-// GET all doctors with filters
-const multer = require('multer') 
-const path = require('path') 
-const crypto = require('crypto') 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, '../frontend/public/images')
-  },
-  filename: function (req, file, cb) {
-    crypto.randomBytes(16, (err, buffer) => {
-      if (err) {
-        return cb(err)
-      }
-      const uniqueName = buffer.toString('hex') + path.extname(file.originalname)
-      cb(null, uniqueName)
-    })
-  
-}})
+const {upload} = require('../utils/multerConfig');
 
-const upload = multer({ storage: storage })
 
 
 
@@ -93,6 +74,7 @@ router.post('/add',upload.single('profile_image'),(req, res) => {
   } = req.body;
   const profile_image = req.file ? req.file.filename : null; // Handle file upload
   
+  console.log(profile_image);
   
   const sql = `
     INSERT INTO Doctors (
@@ -109,7 +91,8 @@ router.post('/add',upload.single('profile_image'),(req, res) => {
       available_days,
       available_time_from,
       available_time_to,
-      status
+      status,
+      
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 

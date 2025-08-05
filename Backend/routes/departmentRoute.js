@@ -21,6 +21,7 @@ const values = [
     req.body.location
 
 ];
+console.log('Adding department with values:', values);
 
   connection.query(query, values,(err, results)=> {
     if (err) return res.status(500).json({ error: 'Database query failed' });

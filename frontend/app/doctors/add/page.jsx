@@ -97,9 +97,16 @@ const AddDoctor = () => {
            className=" p-3 border rounded-lg shadow-sm focus:outline-blue-500 w-full;"
         >
           
-          <option value="Cardiology">Cardiology</option>
+        <option value="Cardiology">Cardiology</option>
+          <option value="Emergency">Emergency</option>
+          <option value="General Medicine">General Medicine</option>
           <option value="Neurology">Neurology</option>
-          <option value="Dermatology">Dermatology</option>
+          <option value="Orthopedics">Orthopedics</option>
+          <option value="Pediatrics">Pediatrics</option>
+          <option value="Gynecology & Obstetrics">Gynecology & Obstetrics</option>
+          <option value="Radiology">Radiology</option>
+          <option value="ICU (Intensive Care)">ICU (Intensive Care)</option>
+          <option value="Pathology & Lab">Pathology & Lab</option>
         </select>
           < input  required value={doctordata.phone}
             onChange={handleChange}

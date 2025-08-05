@@ -19,6 +19,7 @@ const AddDepartment = () => {
   ];
 
   const [doctors, setDoctors] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const [depData, setDepData] = useState({
     department_id: '',
@@ -37,13 +38,21 @@ const AddDepartment = () => {
     fetchDoctors();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('#doctor-dropdown')) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === 'department_name') {
       const selectedDep = depNames.find(dep => dep.name === value);
-      console.log('selectedDep:', selectedDep);
-      
       setDepData(prev => ({
         ...prev,
         department_name: value,
@@ -59,15 +68,22 @@ const AddDepartment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    log('Submitting department data:', depData);
     try {
       const res = await axios.post('http://localhost:5000/dashboard/department', depData);
-      console.log(res);
-      
       alert('Department added successfully');
+      if (res.status === 201) {
+        setDepData({
+          department_id: '',
+          department_name: '',
+          head_doctor_id: '',
+          contact_number: '',
+          location: ''
+        });
+        setShowDropdown(false);
+        window.location.href = '/dashboard/department'; // Redirect to the department page after successful addition
+      }
     } catch (error) {
-      console.error(error);
-      alert('Error adding department');
+      alert(`Error: you are adding a department with the same name`);
     }
   };
 
@@ -76,10 +92,10 @@ const AddDepartment = () => {
       <h1 className='text-2xl font-bold mb-4 text-center mt-5 text-blue-500'>Add Department</h1>
       <form className='bg-white p-6 rounded shadow-md' onSubmit={handleSubmit}>
         <div className='mb-4 grid grid-cols-2 gap-5'>
-          
+
           {/* Department Name Select */}
           <div className='flex justify-start items-center gap-3'>
-            <label className='block text-gray-700 text-md font-bold mb-2' htmlFor="department_name">Department Name :</label>
+            <label className='block text-gray-700 text-md font-bold mb-2 mt-2' htmlFor="department_name">Department Name :</label>
             <select
               name="department_name"
               id="department_name"
@@ -97,24 +113,62 @@ const AddDepartment = () => {
             </select>
           </div>
 
-          {/* Head Doctor Select */}
-          <div className='flex justify-start items-center gap-3'>
-            <label className='block text-gray-700 text-md font-bold mb-2' htmlFor="head_doctor_id">Head Doctor:</label>
-            <select
-              name="head_doctor_id"
-              id="head_doctor_id"
-              value={depData.head_doctor_id}
-              onChange={handleChange}
-              className="py-2 px-5 rounded-lg border shadow-sm w-90"
-              required
+          {/* Head Doctor Custom Dropdown */}
+          <div className='flex justify-start items-center gap-3 relative' id="doctor-dropdown">
+            <label className="block text-gray-700 text-md font-bold mb-2 mt-2" htmlFor="head_doctor_id">
+              Head Doctor:
+            </label>
+            <button
+              type="button"
+              className="flex items-center justify-between py-2 px-4 w-90 border rounded-lg shadow-sm bg-white"
+              onClick={() => setShowDropdown(prev => !prev)}
             >
-              <option value="">Select Doctor</option>
-              {doctors.map((ele) => (
-                <option key={ele.doctor_id} value={ele.doctor_id}>
-                  Dr. {ele.first_name} {ele.last_name}
-                </option>
-              ))}
-            </select>
+              {depData.head_doctor_id ? (() => {
+                const selectedDoc = doctors.find(doc => doc.doctor_id === parseInt(depData.head_doctor_id));
+                return selectedDoc ? (
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src={`http://localhost:5000/images/${selectedDoc.profile_image}`}
+                      alt={selectedDoc.first_name}
+                      width={25}
+                      height={25}
+                      className="rounded-full object-cover"
+                    />
+                    <span>Dr. {selectedDoc.first_name} {selectedDoc.last_name}</span>
+                  </div>
+                ) : <span>Select Doctor</span>;
+              })() : <span>Select Doctor</span>}
+              <svg className="w-4 h-4 ml-2" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4.5L14.5 7" fill="none" stroke="currentColor" strokeWidth="2" /></svg>
+            </button>
+
+            {showDropdown && (
+              <ul className="absolute z-10 mt-2 w-80 bg-white border rounded-lg shadow-md max-h-60 overflow-y-auto">
+                {doctors.map((ele) => (
+                  <li
+                    key={ele.doctor_id}
+                    className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer gap-2"
+                    onClick={() => {
+                      setDepData(prev => ({
+                        ...prev,
+                        head_doctor_id: ele.doctor_id
+                      }));
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Image
+                      src={`http://localhost:5000/images/${ele.profile_image}`}
+                      alt={ele.first_name}
+                      width={25}
+                      height={25}
+                      className="rounded-full object-cover"
+                    />
+                    <span>
+                      Dr. {ele.first_name} {ele.last_name}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           {/* Contact Number */}
