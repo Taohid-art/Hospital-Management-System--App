@@ -1,1 +1,2 @@
-# Hospital-Management-System--App
+# Hospital-Management-System--App  
+CREATE DATABASE healthcare;
