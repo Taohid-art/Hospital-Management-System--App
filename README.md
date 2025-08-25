@@ -1,4 +1,5 @@
 # Hospital-Management-System--App  
+hi
 CREATE DATABASE healthcare;
 CREATE TABLE Staff (
     profile_image VARCHAR(255) DEFAULT 'default.png',
