@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const connection = require('../db');
 const {upload} = require('../utils/multerConfig');
-
+const path = require('path');
+const fs = require('fs');
 
 
 
@@ -91,7 +92,7 @@ router.post('/add',upload.single('profile_image'),(req, res) => {
       available_days,
       available_time_from,
       available_time_to,
-      status,
+      status
       
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
@@ -141,7 +142,7 @@ router.put('/:id/update',upload.single('profile_image'), (req, res) => {
     available_days,
     available_time_from,
     available_time_to,
-    status,
+    status
   } = req.body;
    const profile_image = req.file ? req.file.filename : null;
   
@@ -219,7 +220,7 @@ router.put('/:id/update',upload.single('profile_image'), (req, res) => {
 
 
 // DELETE doctor by ID
-const fs = require('fs');
+
 
 
 
