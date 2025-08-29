@@ -1,34 +1,49 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import Image from 'next/image';
-
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-
+"use client";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function DoctorsPage() {
-  const admin = true
+  const [isAdmin, setIsAdmin] = useState(false);
   const [doctors, setDoctors] = useState([]);
   const [filter, setFilter] = useState({
-    name: '',
-    specialization: '',
-    status: '',
-    gender: '',
+    name: "",
+    specialization: "",
+    status: "",
+    gender: "",
   });
 
+  // ✅ Check admin status from backend
+  useEffect(() => {
+    async function checkAdmin() {
+      try {
+        const res = await axios.get("http://localhost:5000/auth/me", {
+          withCredentials: true, // send cookies
+        });
+        setIsAdmin(res.data.admin);
+        console.log("User info:", res.data.user);
+      } catch {
+        setIsAdmin(false);
+      }
+    }
+    checkAdmin();
+  }, []);
+
+  // ✅ Fetch doctors
   const fetchDoctors = async () => {
     const query = new URLSearchParams(filter).toString();
-    const res = await axios.get(`http://localhost:5000/doctors?${query}`);
+    const res = await axios.get(`http://localhost:5000/doctors?${query}`, {
+      withCredentials: true, // important if doctors API also requires auth
+    });
     setDoctors(res.data);
   };
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       fetchDoctors();
-    }, 300); // debounce
-
+    }, 300); // debounce search
     return () => clearTimeout(timeout);
   }, [filter]);
 
@@ -36,7 +51,6 @@ export default function DoctorsPage() {
     setFilter({ ...filter, [e.target.name]: e.target.value });
   };
 
- 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-100 via-white to-blue-200">
       <h1 className="text-center text-4xl md:text-5xl text-[#102D47] font-bold mb-8">
@@ -96,10 +110,15 @@ export default function DoctorsPage() {
           <option value="Female">Female</option>
           <option value="Other">Other</option>
         </select>
-        { admin && <Link href="/doctors/add" className="bg-blue-600 text-white p-2 rounded-lg text-center hover:bg-blue-700 transition-colors">
-          Add Doctor
-        </Link> }  
-     
+
+        {isAdmin && (
+          <Link
+            href="/doctors/add"
+            className="bg-blue-600 text-white p-2 rounded-lg text-center hover:bg-blue-700 transition-colors"
+          >
+            Add Doctor
+          </Link>
+        )}
       </div>
 
       {/* Doctor Cards */}
@@ -113,18 +132,14 @@ export default function DoctorsPage() {
               transition={{ duration: 0.4 }}
             >
               <Link href={`/doctors/${doctor.doctor_id}`}>
-             
-
                 <div className="bg-white hover:bg-blue-500 text-black hover:text-white w-64 h-full p-2 rounded-xl shadow-lg transition-all duration-300 group">
                   <Image
-                  width={256}
-                  height={144}
-                    src={ `http://localhost:5000/images/${doctor.profile_image}`}
+                    width={256}
+                    height={144}
+                    src={`http://localhost:5000/images/${doctor.profile_image}`}
                     alt="doctor"
                     className="rounded-lg h-52 w-full object-cover mb-4"
                   />
-                  
-
                   <h2 className="text-xl font-bold text-blue-600 group-hover:text-white">
                     Dr. {doctor.first_name} {doctor.last_name}
                   </h2>
@@ -132,7 +147,6 @@ export default function DoctorsPage() {
                   <p className="text-sm">Experience: {doctor.years_of_experience} years</p>
                   <p className="text-sm">Gender: {doctor.gender}</p>
                   <p className="text-sm">Status: {doctor.status}</p>
-                  
                 </div>
               </Link>
             </motion.div>
