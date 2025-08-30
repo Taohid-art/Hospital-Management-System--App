@@ -1,10 +1,11 @@
 const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
-  host: 'localhost',
+ host: 'hopper.proxy.rlwy.net',
   user: 'root',
-  password: '', // your MySQL password if set
-  database: 'healthcare' // your database name
+  password: 'eNidbpKdkmMixCyzygXUPrXZlqAAzvub',
+  database: 'railway',
+  port: 27096
 });
 
 connection.connect((err) => {
