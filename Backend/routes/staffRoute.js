@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 router.get("/", (req, res) => {
-  const query = "SELECT * FROM Staff";
+  const query = "SELECT * FROM staff";
   connection.query(query, (err, results) => {
     if (err) return res.status(500).json({ error: err });
     res.json(results);

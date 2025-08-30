@@ -78,7 +78,7 @@ router.post('/add',upload.single('profile_image'),(req, res) => {
   console.log(profile_image);
   
   const sql = `
-    INSERT INTO Doctors (
+    INSERT INTO doctors (
       first_name,
       last_name,
       gender,
