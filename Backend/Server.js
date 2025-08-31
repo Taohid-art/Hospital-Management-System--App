@@ -12,6 +12,7 @@ const registerRoutes = require('./routes/registerRoute');
 const loginRoutes = require('./routes/loginRoute');
 const logoutRoutes = require('./routes/logoutRoute');
 const authRoute = require("./routes/authRoute");
+const appointmentRoute = require('./routes/appointmentRoute');
 
 const app = express();
 
@@ -37,6 +38,17 @@ app.use(session({
 
 app.use('/images', express.static(path.join(__dirname, '../frontend/public/images')));
 
+// Debug middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
+// Test route
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running!' });
+});
+
 // Routes
 app.use("/auth", authRoute);
 app.use('/login', loginRoutes);
@@ -45,6 +57,7 @@ app.use('/logout', logoutRoutes);
 app.use("/doctors", doctorRoute);
 app.use('/dashboard/department', departmentRoute);
 app.use('/dashboard/staff', staffRoute);
+app.use('/appointments', appointmentRoute);
 
 // Error handler
 app.use((err, req, res, next) => {

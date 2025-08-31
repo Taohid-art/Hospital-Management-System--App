@@ -4,6 +4,7 @@ const connection = require('../db');
 const upload = require('../utils/multerConfig');
 const path = require('path');
 const fs = require('fs');
+const adminAuth = require('../middleware/adminAuth');
 
 
 
@@ -56,7 +57,7 @@ router.get('/:id', (req, res) => {
     }
   );
 });
-router.post('/add',upload.single('profile_image'),(req, res) => {
+router.post('/add', adminAuth, upload.single('profile_image'), (req, res) => {
   const {
     first_name,
     last_name,
@@ -125,7 +126,7 @@ router.post('/add',upload.single('profile_image'),(req, res) => {
 
 
 
-router.put('/:id/update',upload.single('profile_image'), (req, res) => {
+router.put('/:id/update', adminAuth, upload.single('profile_image'), (req, res) => {
   const doctorId = req.params.id;
 
   const {
@@ -224,7 +225,7 @@ router.put('/:id/update',upload.single('profile_image'), (req, res) => {
 
 
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', adminAuth, (req, res) => {
   const doctorId = req.params.id;
 
   // Step 1: Fetch the doctor's profile_image filename
