@@ -1,17 +1,54 @@
+'use client';
 import axios from 'axios';
 import Image from 'next/image';
-import React from 'react'
-import doctorimage from '@/public/images/Rectangle 401.png'
+import React, { useState, useEffect, use } from 'react'
 import DeleteButton from '@/components/Buttons/DeleteButton';
 import Link from 'next/link';
-const page = async ({params}) => {
- 
-  const { id } = params;
-  const res = await axios.get(`http://localhost:5000/doctors/${id}`);
-  
-    const doctor = res.data;
+
+const page = ({params}) => {
+  const [doctor, setDoctor] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { id } = use(params);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch doctor data
+        const doctorRes = await axios.get(`http://localhost:5000/doctors/${id}`);
+        setDoctor(doctorRes.data);
+        
+        // Check admin status
+        const authRes = await axios.get('http://localhost:5000/auth/me', {
+          withCredentials: true,
+        });
+        setIsAdmin(authRes.data.admin || false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-  const admin = true; // Assuming admin is true for this example, replace with actual admin check
+    fetchData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center">
+        <div className="text-2xl text-blue-600">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!doctor) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center">
+        <div className="text-2xl text-red-600">Doctor not found</div>
+      </div>
+    );
+  }
 
  
   return (
@@ -47,12 +84,12 @@ const page = async ({params}) => {
             <p><strong>Department ID:</strong> {doctor.department_id}</p>
            
           </div> 
-           { admin &&
-          <div className='flex justify-between mt-4 aling-center '>
-            <DeleteButton href={`/doctors/${doctor.doctor_id}`} location={'/doctors'} item={'Doctor'} />
-            <Link href={`/doctors/${doctor.doctor_id}/updatee`} className=' mt-4 cursor-pointer bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-800 transition-colors duration-300'>Update</Link>
+           {isAdmin && (
+            <div className='flex justify-between mt-4 align-center'>
+              <DeleteButton href={`/doctors/${doctor.doctor_id}`} location={'/doctors'} item={'Doctor'} />
+              <Link href={`/doctors/${doctor.doctor_id}/updatee`} className='mt-4 cursor-pointer bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-800 transition-colors duration-300'>Update</Link>
             </div>
-           } 
+           )} 
         </div>
       </div>
     </main>

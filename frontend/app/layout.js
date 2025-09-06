@@ -21,10 +21,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={true}
       >   
-      <div className="container w-full max-w-[1200px] mx-auto px-4]">
+      <div className="w-full">
         <Nav />
-        {children}
+        <div className="max-w-[1400px] mx-auto">
+          {children}
+        </div>
         </div>
       </body>
     </html>

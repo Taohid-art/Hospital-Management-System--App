@@ -4,6 +4,7 @@ const connection = require('../db');
 const upload = require('../utils/multerConfig');
 const path = require('path');
 const fs = require('fs');
+const adminAuth = require('../middleware/adminAuth');
 
 
 
@@ -56,7 +57,7 @@ router.get('/:id', (req, res) => {
     }
   );
 });
-router.post('/add',upload.single('profile_image'),(req, res) => {
+router.post('/add', upload.single('profile_image'), (req, res) => {
   const {
     first_name,
     last_name,
@@ -73,9 +74,11 @@ router.post('/add',upload.single('profile_image'),(req, res) => {
     available_time_to,
     status,
   } = req.body;
-  const profile_image = req.file ? req.file.filename : null; // Handle file upload
+  const profile_image = req.file ? req.file.filename : 'default.png';
   
-  console.log(profile_image);
+  console.log('Request body:', req.body);
+  console.log('Uploaded file:', req.file);
+  console.log('Profile image:', profile_image);
   
   const sql = `
     INSERT INTO doctors (
@@ -125,7 +128,7 @@ router.post('/add',upload.single('profile_image'),(req, res) => {
 
 
 
-router.put('/:id/update',upload.single('profile_image'), (req, res) => {
+router.put('/:id/update', upload.single('profile_image'), (req, res) => {
   const doctorId = req.params.id;
 
   const {

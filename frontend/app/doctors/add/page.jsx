@@ -11,7 +11,7 @@ const AddDoctor = () => {
         email: "",
         department_id: "",
         profile_image: "",
-        specialization: "Cardology",
+        specialization: "Cardiology",
         qualification: "",
         years_of_experience:"",
         available_days: "Monday",
@@ -27,28 +27,31 @@ const AddDoctor = () => {
     const router = useRouter();
     const submitHandler = async (e) => {
         e.preventDefault();
-        const fromdata = new FormData();
-        for ( const key in doctordata){
-          fromdata.append(key,doctordata[key]);
-
-        }
-        try{
-      const res = await axios.post("http://localhost:5000/doctors/add",fromdata,{
-        headers:{
-          'Content-Type':'multipart/form-data'
-        }
-      })
-      
-      
-      if (res.status===200){
-        router.push('/doctors')
-      }
-    }catch(err)
-    {
-        console.log(err);
+        console.log('Form data before submission:', doctordata);
         
+        const fromdata = new FormData();
+        for (const key in doctordata){
+          fromdata.append(key, doctordata[key]);
+        }
+        
+        try{
+            const res = await axios.post("http://localhost:5000/doctors/add", fromdata, {
+                headers:{
+                    'Content-Type':'multipart/form-data'
+                }
+            });
+            
+            console.log('Response:', res.data);
+            
+            if (res.status === 200){
+                alert('Doctor added successfully!');
+                router.push('/doctors');
+            }
+        } catch(err) {
+            console.error('Error details:', err.response?.data || err.message);
+            alert('Error adding doctor: ' + (err.response?.data?.error || err.message));
+        }
     }
-  }
     
     
   return (
