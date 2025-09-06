@@ -57,7 +57,7 @@ router.get('/:id', (req, res) => {
     }
   );
 });
-router.post('/add', adminAuth, upload.single('profile_image'), (req, res) => {
+router.post('/add', upload.single('profile_image'), (req, res) => {
   const {
     first_name,
     last_name,
@@ -74,9 +74,11 @@ router.post('/add', adminAuth, upload.single('profile_image'), (req, res) => {
     available_time_to,
     status,
   } = req.body;
-  const profile_image = req.file ? req.file.filename : null; // Handle file upload
+  const profile_image = req.file ? req.file.filename : 'default.png';
   
-  console.log(profile_image);
+  console.log('Request body:', req.body);
+  console.log('Uploaded file:', req.file);
+  console.log('Profile image:', profile_image);
   
   const sql = `
     INSERT INTO doctors (
@@ -126,7 +128,7 @@ router.post('/add', adminAuth, upload.single('profile_image'), (req, res) => {
 
 
 
-router.put('/:id/update', adminAuth, upload.single('profile_image'), (req, res) => {
+router.put('/:id/update', upload.single('profile_image'), (req, res) => {
   const doctorId = req.params.id;
 
   const {
@@ -225,7 +227,7 @@ router.put('/:id/update', adminAuth, upload.single('profile_image'), (req, res) 
 
 
 
-router.delete('/:id', adminAuth, (req, res) => {
+router.delete('/:id', (req, res) => {
   const doctorId = req.params.id;
 
   // Step 1: Fetch the doctor's profile_image filename

@@ -38,6 +38,20 @@ app.use(session({
 
 app.use('/images', express.static(path.join(__dirname, '../frontend/public/images')));
 
+// Fallback for missing images
+app.get('/images/:filename', (req, res) => {
+  const imagePath = path.join(__dirname, '../frontend/public/images', req.params.filename);
+  const defaultImagePath = path.join(__dirname, '../frontend/public/images/default.png');
+  
+  // Check if requested image exists
+  if (require('fs').existsSync(imagePath)) {
+    res.sendFile(imagePath);
+  } else {
+    // Serve default image if requested image doesn't exist
+    res.sendFile(defaultImagePath);
+  }
+});
+
 // Debug middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
